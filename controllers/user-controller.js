@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.js";
 import bcrypt from "bcrypt";
 import { sendCookie } from "../utils/features.js";
+import errorHandler from "../middlewares/error.js";
 export const getUser = (req, res) => {
   return res.json({
     success: true,
@@ -9,46 +10,42 @@ export const getUser = (req, res) => {
   });
 };
 
-export const register = async (req, res) => {
-  const { name, email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (user) {
-    return res.status(404).json({
-      success: false,
-      msg: "User already exists !",
+export const register = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (user) {
+      return next(new errorHandler("User already exists", 404));
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.create({
+      name,
+      email,
+      password: hashedPassword,
     });
+    return next(new errorHandler("user registered successfully", 201));
+  } catch (error) {
+    next(error);
   }
-  const hashedPassword = await bcrypt.hash(password, 10);
-  await User.create({
-    name,
-    email,
-    password: hashedPassword,
-  });
-  return res.status(201).json({
-    success: true,
-    msg: "User Registered Successfully !",
-  });
 };
 
-export const login = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      msg: "User not exists !",
-    });
-  }
-  const isMatch = await bcrypt.compare(password, user.password);
+    if (!user) {
+      return next(new errorHandler("User not exists !", 404));
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
 
-  if (!isMatch) {
-    return res.status(404).json({
-      success: false,
-      msg: "invalid user or password !",
-    });
+    if (!isMatch) {
+      return next(new errorHandler("Invalid user or password !", 404));
+    }
+    sendCookie(res, user, 200, `welcome back dear ${user.name}`);
+  } catch (error) {
+    next(error);
   }
-  sendCookie(res, user, 200, `welcome back dear ${user.name}`);
 };
 
 export const logout = (req, res) => {
