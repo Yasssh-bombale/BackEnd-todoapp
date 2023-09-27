@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  getUser,
+  getAllUser,
   login,
   logout,
   register,
@@ -11,5 +11,6 @@ const router = express.Router();
 router.post("/register", register);
 router.post("/login", login);
 router.get("/logout", logout);
-router.get("/all", isAuthenticated, getUser);
+router.get("/all", isAuthenticated, getAllUser);
+
 export default router;

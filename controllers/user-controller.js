@@ -60,3 +60,15 @@ export const logout = (req, res) => {
       msg: "Log out successfully !",
     });
 };
+
+export const getAllUser = async (req, res, next) => {
+  try {
+    const user = await User.find({});
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
