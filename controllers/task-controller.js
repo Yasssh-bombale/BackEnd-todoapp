@@ -25,7 +25,7 @@ export const getTask = async (req, res, next) => {
   try {
     const task = await Task.find({});
     if (!task) {
-      return next(new errorHandler("No Task Found !", 400));
+      return next(new errorHandler("No Task Found !", 400,false));
     }
     return res.status(200).json({
       success: true,
@@ -42,7 +42,7 @@ export const updateTask = async (req, res, next) => {
   try {
     const { id } = req.params;
     const task = await Task.findById(id);
-    if (!task) return next(new errorHandler("Task Not Found !", 400));
+    if (!task) return next(new errorHandler("Task Not Found !", 400,false));
     task.isCompleted = !task.isCompleted;
     await task.save();
     return res.status(200).json({

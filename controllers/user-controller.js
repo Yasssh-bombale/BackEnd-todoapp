@@ -15,7 +15,7 @@ export const register = async (req, res, next) => {
     const { name, email, password } = req.body;
     const user = await User.findOne({ email });
     if (user) {
-      return next(new errorHandler("User already exists", 404));
+      return next(new errorHandler("User already exists", 404, false));
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.create({
@@ -23,7 +23,7 @@ export const register = async (req, res, next) => {
       email,
       password: hashedPassword,
     });
-    return next(new errorHandler("user registered successfully", 201));
+    return next(new errorHandler("user registered successfully", 201, true));
   } catch (error) {
     next(error);
   }
@@ -35,12 +35,12 @@ export const login = async (req, res, next) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return next(new errorHandler("User not exists !", 404));
+      return next(new errorHandler("User not exists !", 404, false));
     }
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return next(new errorHandler("Invalid user or password !", 404));
+      return next(new errorHandler("Invalid user or password !", 404, false));
     }
     sendCookie(res, user, 200, `welcome back dear ${user.name}`);
   } catch (error) {
@@ -54,6 +54,8 @@ export const logout = (req, res) => {
     .cookie("token", "", {
       httpOnly: true,
       expires: new Date(Date.now()),
+      sameSite: process.env.NODE_ENV === "Development" ? "lax" : "none",
+      secure: process.env.NODE_ENV === "Development" ? false : true,
     })
     .json({
       success: true,

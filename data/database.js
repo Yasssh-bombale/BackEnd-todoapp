@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export const mongoConnection = () => {
   mongoose
-    .connect("mongodb://127.0.0.1:27017", {
+    .connect(process.env.MONGO_URI, {
       dbName: "Demo-apis-testing",
     })
     .then(() => {
