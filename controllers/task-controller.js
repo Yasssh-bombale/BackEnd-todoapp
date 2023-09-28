@@ -60,10 +60,7 @@ export const deleteTask = async (req, res, next) => {
     if (!task) return next(new errorHandler("Task Not Found !", 400));
 
     await task.deleteOne();
-    return res.status(200).json({
-      success: true,
-      msg: "Task Deleted Successfully !",
-    });
+    return next(new errorHandler("Task Deleted Successfully", 200, true));
   } catch (error) {
     next(error);
   }
