@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getAllUser,
+  getMyProfile,
   login,
   logout,
   register,
@@ -12,5 +13,6 @@ router.post("/register", register);
 router.post("/login", login);
 router.get("/logout", logout);
 router.get("/all", isAuthenticated, getAllUser);
+router.get("/me", isAuthenticated, getMyProfile);
 
 export default router;
